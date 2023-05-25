@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
+const apiKey = '7baec9c3b474693710b481f18a1a0f98';
+
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -40,23 +42,30 @@ final Geolocator geolocator = Geolocator();
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+    late double latitude = 0.0;
+    late double longitude = 0.0;
 
     @override
   void initState() {
-
     super.initState();
-    _getCurrentLocation().then((Position position) {
+    getLocation();
+  }
+  void getLocation() async {
+    await _getCurrentLocation().then((Position position) {
       // Handle the retrieved location
-         print('Latitude: ${position.latitude}');
-          print('Longitude: ${position.longitude}');
-          }).catchError((e) {
-          // Handle any errors that occur during the location retrieval process
-        print(e);
-   });
+      //    print('Latitude: ${position.latitude}');
+      //     print('Longitude: ${position.longitude}');
+      latitude = position.latitude;
+      longitude = position.longitude;
+    }).catchError((e) {
+      // Handle any errors that occur during the location retrieval process
+      print(e);
+    });
 
   }
+
     void getData() async {
-     var url = Uri.parse('https://samples.openweathermap.org/data/2.5/forecast?id=524901&appid=b1b15e88fa797225412429c1c50c122a1');
+     var url = Uri.parse('http://api.openweathermap.org/geo/1.0/reverse?lat=$latitude&lon=$longitude&appid=$apiKey');
      http.Response response = await http.get(url);
       if (response.statusCode == 200) {
       String data = response.body;
@@ -69,10 +78,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       print(condition);
       print(cityName);
 
-      // var longtitute = jsonDecode(data)['cod'];
-      // print('Longitude: $longtitute');
-      // var weatherDescription = jsonDecode(data)['list'][0]['weather'][0]['description'];
-      // print(weatherDescription);
      } else {
      print('Request failed with status: ${response.statusCode}');
       }
@@ -80,7 +85,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     @override
   Widget build(BuildContext context) {
-      getData();
     return Scaffold();
   }
 }
